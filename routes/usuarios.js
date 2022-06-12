@@ -1,21 +1,23 @@
 
 const { Router } = require('express');
-const { body ,param} = require('express-validator');
+const { body, param } = require('express-validator');
 const { usuariosGet, usuariosPost,
     usuariosPut, usuariosPatch,
     usuariosDelete
 } = require('../controllers/usuarios');
-const { esRolValido, emailExiste,existeUsuarioPorId } = require('../helpers/db-validators');
+const { esRolValido, emailExiste, existeUsuarioPorId } = require('../helpers/db-validators');
 const { validarCampos } = require('../middlewares/validar-campos');
 
 const router = Router();
 
-router.get('/', usuariosGet);
+router.get('/', [
+
+], usuariosGet);
 
 router.put('/:id', [
     param('id', 'No es un id valido').exists({ checkNull: true })
-    .isMongoId().bail()
-    .custom(existeUsuarioPorId).bail(),
+        .isMongoId().bail()
+        .custom(existeUsuarioPorId).bail(),
     body('rol').custom(esRolValido),
     validarCampos
 ], usuariosPut);
@@ -27,7 +29,15 @@ router.post('/', [
     body('rol').custom(esRolValido),
     validarCampos
 ], usuariosPost);
-router.delete('/', usuariosDelete);
+
+router.delete('/:_id', [
+    param('_id', 'No es un id valido').exists({ checkNull: true })
+    .isMongoId().bail()
+    .custom(existeUsuarioPorId).bail(),
+    validarCampos
+
+], usuariosDelete);
+
 router.patch('/', usuariosPatch);
 
 module.exports = router;

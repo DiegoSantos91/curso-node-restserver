@@ -1,23 +1,27 @@
 const { response } = require('express');
 const bcryptjs = require('bcryptjs');
 const Usuario = require('../models/usuario');
+const usuario = require('../models/usuario');
 
-const usuariosGet = (req, res = response) => {
+const usuariosGet = async (req, res = response) => {
+    const query = { status: true };
+    const { l, d = 0 } = req.query;
 
-    // const params = req.query;
-    const { q, nombre, apikey } = req.query;
+    const [total, usuarios] = await Promise.all([
+        usuario.countDocuments(query),
+        usuario.find(query)
+            .skip(d)
+            .limit(l)
+    ]);
 
     res.json({
-        "msg": 'get API- Controllador',
-        q,
-        nombre,
-        apikey
+        total,
+        usuarios
     })
 };
 
 const usuariosPost = async (req, res = response) => {
 
-    // const body = req.body;
     const { name, email, password, rol } = req.body;
     const usuario = new Usuario({ name, email, password, rol });
 
@@ -32,8 +36,8 @@ const usuariosPost = async (req, res = response) => {
     })
 };
 const usuariosPut = async (req, res = response) => {
+    const { _id, password, google, email, ...resto } = req.body;
     const { id } = req.params;
-    const { _id,password, google,email, ...resto } = req.body;
 
     //validar contra DB
     if (password) {
@@ -43,7 +47,6 @@ const usuariosPut = async (req, res = response) => {
     }
     const usuario = await Usuario.findByIdAndUpdate(id, resto)
     res.json({
-        "msg": 'Put API- Controllador',
         usuario
     })
 };
@@ -52,9 +55,15 @@ const usuariosPatch = (req, res = response) => {
         "msg": 'Patch API- Controllador'
     })
 };
-const usuariosDelete = (req, res = response) => {
+const usuariosDelete = async (req, res = response) => {
+    const { _id } = req.params;
+    // delete fisico 
+    // const usuario = await Usuario.findByIdAndDelete(_id);
+    //delete no fisico 
+    const usuario = await Usuario.findByIdAndUpdate(_id, { status: false });
+    
     res.json({
-        "msg": 'Delete API- Controllador'
+        usuario
     })
 };
 
