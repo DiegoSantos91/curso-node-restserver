@@ -36,7 +36,7 @@ const usuariosPost = async (req, res = response) => {
     })
 };
 const usuariosPut = async (req, res = response) => {
-    const { _id, password, google, email, ...resto } = req.body;
+    const { uid, password, google, email, ...resto } = req.body;
     const { id } = req.params;
 
     //validar contra DB
@@ -57,13 +57,20 @@ const usuariosPatch = (req, res = response) => {
 };
 const usuariosDelete = async (req, res = response) => {
     const { _id } = req.params;
+    // const uid = req.uid;
     // delete fisico 
     // const usuario = await Usuario.findByIdAndDelete(_id);
     //delete no fisico 
     const usuario = await Usuario.findByIdAndUpdate(_id, { status: false });
     
+    //obtener el usuario autenticado
+    const usuarioAutenticado = req.usuario
+
     res.json({
-        usuario
+        usuario,
+        usuarioAutenticado
+        // ,
+        // uid
     })
 };
 
